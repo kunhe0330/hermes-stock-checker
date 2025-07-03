@@ -5,7 +5,7 @@ import asyncio
 from bs4 import BeautifulSoup
 from flask import Flask
 
-# Flask 앱 초기화
+# Flask 앱 초기화 (이 부분이 반드시 최상단에 있어야 합니다)
 app = Flask(__name__)
 
 async def send_telegram_message(bot, chat_id, message):
@@ -22,24 +22,19 @@ def check_stock_status(url):
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
         response = requests.get(url, headers=headers, timeout=10)
 
-        # 1. 페이지 자체가 열리지 않거나, 우리가 아는 오류 페이지인 경우
         if response.status_code != 200 or '인터넷 연결에 문제가 발생했습니다' in response.text:
             print(f"URL: {url}, 상태: NO_PAGE (페이지 없음)")
             return "NO_PAGE"
 
-        # 2. 페이지가 정상적으로 열렸을 때, HTML을 분석
         soup = BeautifulSoup(response.text, 'lxml')
         form = soup.find('form', id='add-to-cart-form')
         
-        # 3. '장바구니 담기' 버튼을 찾아 활성화 여부 확인
         if form:
             add_to_cart_button = form.find('button')
-            # 버튼이 있고, 비활성화(disabled) 속성이 없다면 재입고 상태
             if add_to_cart_button and not add_to_cart_button.has_attr('disabled'):
                 print(f"URL: {url}, 상태: CART_ACTIVE (장바구니 활성화)")
                 return "CART_ACTIVE"
         
-        # 4. 장바구니 버튼이 활성화되지 않았다면, 그냥 '상세 페이지'가 열린 상태
         print(f"URL: {url}, 상태: PAGE_ACTIVE (상세페이지만 활성화)")
         return "PAGE_ACTIVE"
 
