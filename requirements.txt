@@ -1,2 +1,6 @@
 requests
 python-telegram-bot
+beautifulsoup4
+lxml
+Flask
+gunicorn
